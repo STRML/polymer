@@ -35,8 +35,12 @@
       this.takeAttributes();
       // add event listeners
       this.addHostListeners();
+      // create node reference storage:
+      this.$ = {};
       // process declarative resources
-      this.parseElements(this.__proto__);
+      if (this.ownerDocument.defaultView) {
+        this.parseElements(this.__proto__);
+      }
       // unless this element is inserted into the main document
       // (or the user otherwise specifically prevents it)
       // bindings will self destruct after a short time; this is 
@@ -52,6 +56,9 @@
       this._enteredDocumentCallback();
     },
     enteredDocumentCallback: function() {
+      if (!this.hasParsedElements) {
+        this.parseElements(this.__proto__);
+      }
       this._enteredDocumentCallback();
     },
     _enteredDocumentCallback: function() {
@@ -84,6 +91,7 @@
     },
     // recursive ancestral <element> initialization, oldest first
     parseElements: function(p) {
+      this.hasParsedElements = true;
       if (p && p.element) {
         this.parseElements(p.__proto__);
         p.parseElement.call(this, p.element);
