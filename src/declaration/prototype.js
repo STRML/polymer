@@ -30,6 +30,17 @@
     }
   }
 
+  var basePrototype = null;
+  function getPolymerBasePrototype() {
+    if (!basePrototype) {
+      basePrototype = {};
+      Object.keys(api.instance).forEach(function(n) {
+        extend(basePrototype, api.instance[n]);
+      });  
+    }
+    return basePrototype;
+  }
+
   // declarative implementation: <polymer-element>
 
   var prototype = generatePrototype();
@@ -58,9 +69,7 @@
     // install Polymer instance api into prototype chain, as needed 
     ensureBaseApi: function(prototype) { 
       if (!prototype.PolymerBase) {
-        Object.keys(api.instance).forEach(function(n) {
-          extend(prototype, api.instance[n]);
-        });
+        extend(prototype, getPolymerBasePrototype());
         prototype = Object.create(prototype);
       }
       // inherit publishing meta-data
