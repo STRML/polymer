@@ -42,7 +42,8 @@
     },
     parseLocalEvents: function() {
       // extract data from all templates into delegates
-      this.querySelectorAll('template').forEach(function(t) {
+      Array.prototype.forEach.call(this.querySelectorAll('template'),
+          function(t) {
         // store delegate information directly on template
         t.delegates = {};
         // acquire delegates from entire subtree at t
@@ -59,7 +60,7 @@
       }
     },
     accumulateChildEvents: function(node, events) {
-      node.childNodes.forEach(function(n) {
+      Array.prototype.forEach.call(node.childNodes, function(n) {
         this.accumulateEvents(n, events);
       }, this);
     },
@@ -71,7 +72,7 @@
     },
     accumulateAttributeEvents: function(node, events) {
       if (node.attributes) {
-        node.attributes.forEach(function(a) {
+        Array.prototype.forEach.call(node.attributes, function(a) {
           if (hasEventPrefix(a.name)) {
             this.accumulateEvent(removeEventPrefix(a.name), events);
           }
