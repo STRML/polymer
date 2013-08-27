@@ -20,9 +20,10 @@
   var empty = [];
 
   var properties = {
+    OBSERVE_SUFFIX: OBSERVE_SUFFIX,
     // set up property observers 
     observeProperties: function() {
-      var names = this.getCustomPropertyNames();
+      var names = this.getObservablePropertyNames();
       for (var i=0, l=names.length, n; (i<l) && (n=names[i]); i++) {
         this.observeProperty(n);
       }
@@ -32,17 +33,20 @@
     getCustomPropertyNames: function() {
       return this.customPropertyNames;
     },
+    // fetch an pre-constructor array of all property names in our prototype
+    // that should be observed.
+    getObservablePropertyNames: function() {
+      return this.observeablePropertyNames;
+    },
     // observe property if shouldObserveProperty 
     observeProperty: function(name) {
-      if (this.shouldObserveProperty(name)) {
-        log.watch && console.log(LOG_OBSERVE, this.localName, name);
-        var propertyChanged = function(neo, old) {
-            log.watch && console.log(LOG_OBSERVED, this.localName, this.id || '', name, this[name], old);
-            this.dispatchPropertyChange(name, old);
-          }.bind(this);
-        var observer = new PathObserver(this, name, propertyChanged);
-        registerObserver(this, name, observer);
-      }
+      log.watch && console.log(LOG_OBSERVE, this.localName, name);
+      var propertyChanged = function(neo, old) {
+          log.watch && console.log(LOG_OBSERVED, this.localName, this.id || '', name, this[name], old);
+          this.dispatchPropertyChange(name, old);
+        }.bind(this);
+      var observer = new PathObserver(this, name, propertyChanged);
+      registerObserver(this, name, observer);
     },
     bindProperty: function(property, model, path) {
       // apply Polymer two-way reference binding
@@ -53,12 +57,6 @@
     },
     unbindAllProperties: function() {
       unregisterObservers(this);
-    },
-    // property should be observed if it has an observation callback
-    // or if it is published
-    shouldObserveProperty: function(name) {
-      return Boolean(this[name + OBSERVE_SUFFIX] || 
-          Object.keys(this[PUBLISHED]).indexOf(name) >= 0);
     },
     dispatchPropertyChange: function(name, oldValue) {
       this.propertyToAttribute(name);

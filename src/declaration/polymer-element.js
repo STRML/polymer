@@ -116,7 +116,7 @@
       if (this.prototype.registerCallback) {
         this.prototype.registerCallback(this);
       }
-      // cache the list of custom prototype names for faster reflection
+      // cache property name info for faster reflection and lookup
       this.cacheProperties();
     },
     // if a named constructor is requested in element, map a reference

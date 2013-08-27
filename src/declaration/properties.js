@@ -6,25 +6,27 @@
 (function(scope) {
   
   // imports
-
-  // magic words
-
-  var OBSERVE_SUFFIX = 'Changed';
+  var PUBLISHED = scope.api.instance.attributes.PUBLISHED;
+  var OBSERVE_SUFFIX = scope.api.instance.properties.OBSERVE_SUFFIX;
 
   // element api
-  
   var empty = [];
 
   var properties = {
     cacheProperties: function() {
-      this.prototype.customPropertyNames = this.getCustomPropertyNames(this.prototype);
+      this.prototype.customPropertyNames = this.fetchCustomPropertyNames();
+      this.prototype.publishedPropertyNames = 
+          this.fetchPublishedPropertyNames();
+      this.prototype.observeablePropertyNames =
+          this.fetchObserveablePropertyNames();
     },
     // fetch an array of all property names in our prototype chain 
     // above PolymerBase
     // TODO(sjmiles): perf: reflection is slow, relatively speaking
     //  If an element may take 6us to create, getCustomPropertyNames might
     //  cost 1.6us more.
-    getCustomPropertyNames: function(p) {
+    fetchCustomPropertyNames: function() {
+      var p = this.prototype;
       var properties = {}, some;
       while (p && !scope.isBase(p)) {
         var names = Object.getOwnPropertyNames(p);
@@ -36,11 +38,29 @@
         p = p.__proto__;
       }  
       return some ? Object.keys(properties) : empty;
+    },
+    fetchPublishedPropertyNames: function() {
+      var names = [], lcNames = [];
+      Object.keys(this.prototype[PUBLISHED]).forEach(function(k) {
+        names.push(k);
+        lcNames.push(k.toLowerCase());
+      }, this);
+      return {names: names, lcNames: lcNames};
+    },
+    fetchObserveablePropertyNames: function() {
+      var observeables = this.prototype.publishedPropertyNames.names.slice();
+      var names = this.prototype.customPropertyNames;
+      for (var i=0, l=names.length, name; i < l; i++) {
+        name = names[i];
+        if (this.prototype[name + OBSERVE_SUFFIX]) {
+          observeables.push(name);
+        }
+      }
+      return observeables;
     }
   };
 
   // exports
-
   scope.api.declaration.properties = properties;
   
 })(Polymer);

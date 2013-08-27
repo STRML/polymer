@@ -53,10 +53,10 @@
     },
     // return the published property matching name, or undefined
     propertyForAttribute: function(name) {
-      // matchable properties must be published
-      var properties = Object.keys(this[PUBLISHED]);
-      // search for a matchable property
-      return properties[properties.map(lowerCase).indexOf(name.toLowerCase())];
+      var i = this.publishedPropertyNames.lcNames.indexOf(name);
+      if (i >= 0) {
+        return this.publishedPropertyNames.names[i];
+      }
     },
     // convert representation of 'stringValue' based on type of 'defaultValue'
     deserializeValue: function(stringValue, defaultValue) {
@@ -71,7 +71,7 @@
       }
     },
     propertyToAttribute: function(name) {
-      if (Object.keys(this[PUBLISHED]).indexOf(name) >= 0) {
+      if (this.publishedPropertyNames.names.indexOf(name) >= 0) {
         var inferredType = typeof this.__proto__[name];
         var serializedValue = this.serializeValue(this[name], inferredType);
         // boolean properties must reflect as boolean attributes
@@ -85,7 +85,6 @@
         } else if (inferredType === 'boolean') {
           this.removeAttribute(name);
         }
-        
       }
     }
   };
