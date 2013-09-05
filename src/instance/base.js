@@ -28,24 +28,34 @@
     },
     // system entry point, do not override
     _createdCallback: function() {
-      if (!this.ownerDocument.defaultView &&
-          !scope.canCreateElements) {
+      window.timer && timer.time('created');
+      if ((!this.ownerDocument.defaultView &&
+          !Polymer.canCreateElements) || Polymer.preventUpgrades === true) {
         Polymer.abortedElements++;
+      window.timer && timer.timeEnd('created');
         return;
       }
-      scope.canCreateElements = true;
+      Polymer.canCreateElements = true;
+      
       //this.style.display = 'inline-block';
       // install property observers
       // do this first so we can observe changes during initialization
+      //window.timer && timer.time('created:observe');
       this.observeProperties();
+      //window.timer && timer.timeEnd('created:observe');
+      //window.timer && timer.time('created:sugar');
       // install boilerplate attributes
       this.copyInstanceAttributes();
       // process input attributes
       this.takeAttributes();
       // add event listeners
       this.addHostListeners();
+      //window.timer && timer.timeEnd('created:sugar');
+      //window.timer && timer.time('created:parse');
       // process declarative resources
       this.parseElements(this.__proto__);
+      //window.timer && timer.timeEnd('created:parse');
+      //window.timer && timer.time('created:user');
       // unless this element is inserted into the main document
       // (or the user otherwise specifically prevents it)
       // bindings will self destruct after a short time; this is 
@@ -56,6 +66,8 @@
       // TODO(sorvell): bc
       this.ready();
       this.created();
+      //window.timer && timer.timeEnd('created:user');
+      window.timer && timer.timeEnd('created');
     },
     insertedCallback: function() {
       this._enteredDocumentCallback();

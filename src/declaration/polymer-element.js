@@ -80,6 +80,7 @@
     },
     register: function(name, extendee) {
       // build prototype combining extendee, Polymer base, and named api
+      window.timer && timer.time('register');
       this.prototype = this.generateCustomPrototype(name, extendee);
       // backref
       this.prototype.element = this;
@@ -95,12 +96,17 @@
       if (window.ShadowDOMPolyfill) {
         Platform.ShadowCSS.shimStyling(this.templateContent(), name, extendee);
       }
+      window.timer && timer.timeEnd('register');
       // register our custom element
+      //window.timer && timer.time('register:native');
       this.registerPrototype(name);
+      //window.timer && timer.timeEnd('register:native');
       // reference constructor in a global named by 'constructor' attribute
+      //window.timer && timer.time('register:other');
       this.publishConstructor();
       // subclasses may now register themselves
       notifySuper(name);
+      //window.timer && timer.timeEnd('register:other');
     },
     // implement various declarative features
     desugar: function(prototype) {
